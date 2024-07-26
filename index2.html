@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OTP Verification</title>
+  </head>
+  <body>
+    <div id="recaptcha-container"></div>
+    <input
+      type="tel"
+      id="phoneNumberInput"
+      placeholder="Enter your phone number"
+    />
+    <button id="sendOtpButton">Send OTP</button>
+    <input type="text" id="otpInput" placeholder="Enter OTP" />
+    <button id="verifyOtpButton">Verify OTP</button>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+      import {
+        getAuth,
+        signInWithPhoneNumber,
+        RecaptchaVerifier,
+      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBOsQX2drw-ZUGXwyIHThF7pYin1Qz1AEQ",
+        authDomain: "telotp-736b8.firebaseapp.com",
+        projectId: "telotp-736b8",
+        storageBucket: "telotp-736b8.appspot.com",
+        messagingSenderId: "113044833022",
+        appId: "1:113044833022:web:23c92165c81be11b0b1baf",
+        measurementId: "G-LYYWF9PRE0",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+
+      async function sendOtp() {
+        const phoneNumber =
+          "+91" + document.getElementById("phoneNumberInput").value;
+        const appVerifier = new RecaptchaVerifier(
+          "recaptcha-container",
+          {
+            size: "invisible",
+
+            appVerificationDisabledForTesting: true,
+          },
+          auth
+        );
+        signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+          .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            alert("OTP Sent!");
+          })
+          .catch((error) => {
+            console.error("Error sending OTP", error);
+          });
+      }
+
+      async function verifyOtp(otp) {
+        const confirmationResult = window.confirmationResult;
+        confirmationResult
+          .confirm(otp)
+          .then((result) => {
+            const user = result.user;
+            alert("Verification successful!");
+          })
+          .catch((error) => {
+            console.error("Error verifying OTP", error);
+          });
+      }
+      document
+        .getElementById("sendOtpButton")
+        .addEventListener("click", sendOtp);
+      document
+        .getElementById("verifyOtpButton")
+        .addEventListener("click", () =>
+          verifyOtp(document.getElementById("otpInput").value)
+        );
+    </script>
+  </body>
+</html>

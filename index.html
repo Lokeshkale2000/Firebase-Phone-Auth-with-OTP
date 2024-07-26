@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Phone Auth with OTP</title>
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-compat.js"></script>
+  <!-- Firebase Auth (optional for authentication) -->
+  <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>Firebase Phone Authentication with OTP</h2>
+
+  <div id="recaptcha-container"></div>
+
+  <input type="text" id="number" placeholder="Enter your phone number">
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <input type="text" id="verification-code" placeholder="Enter OTP">
+  <button onclick="verifyOTP()">Verify OTP</button>
+
+  <script>
+  
+const firebaseConfig = {
+  apiKey: "AIzaSyCeEtoG4rJ_UCapHLkKluNryPA-_jU_WnU",
+  authDomain: "otp-using-using-firebase.firebaseapp.com",
+  projectId: "otp-using-using-firebase",
+  storageBucket: "otp-using-using-firebase.appspot.com",
+  messagingSenderId: "408197431483",
+  appId: "1:408197431483:web:8ffab865ee14cab350e99e",
+  measurementId: "G-RYGKHMHSQ0"
+};
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    function renderRecaptcha() {
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'normal',
+        'callback': (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+        'expired-callback': () => {
+          // Reset reCAPTCHA
+          renderRecaptcha();
+        }
+      });
+      recaptchaVerifier.render();
+    }
+
+    function sendOTP() {
+      var phoneNumber = document.getElementById('number').value; // Get the user's phone number
+      var appVerifier = window.recaptchaVerifier;
+
+      firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          console.log("OTP Sent");
+        }).catch((error) => {
+          console.error("Error sending OTP:", error);
+        });
+    }
+
+    function verifyOTP() {
+      var code = document.getElementById('verification-code').value; // Get the OTP from the user
+      confirmationResult.confirm(code)
+        .then((result) => {
+          var user = result.user;
+          console.log("OTP Verified");
+        }).catch((error) => {
+          console.error("Error verifying OTP:", error);
+        });
+    }
+
+    renderRecaptcha();
+  </script>
+</body>
+</html>
